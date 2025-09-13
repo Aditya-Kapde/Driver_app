@@ -53,14 +53,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons.local_shipping_outlined,
+                        Icons.directions_bus_filled,
                         color: Colors.white,
                         size: 40,
                       ),
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'DriverPortal',
+                      'MargDarshak',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 32,
