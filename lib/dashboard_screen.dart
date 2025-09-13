@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'setup_profile_personal_screen.dart';
 import 'sos_emergency_screen.dart';
 import 'trip_history_screen.dart';
-import 'journey_planner_screen.dart'; // Add this import
+import 'journey_planner_screen.dart';
+import 'support_center_screen.dart' as support_center;
+import 'chat_support_screen.dart';
+import 'settings_screen.dart';
+import 'theme_notifier.dart'; // Import your ThemeNotifier
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,18 +24,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _selectedIndex = index;
     });
     
-    // Handle navigation based on tab index
-    if (index == 1) { // Routes tab pressed
+    if (index == 1) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const JourneyPlannerScreen()),
       );
-    } else if (index == 2) { // Trip History tab pressed
+    } else if (index == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const TripHistoryScreen()),
       );
-    } else if (index == 3) { // Setup Profile tab pressed
+    } else if (index == 3) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const SetupProfilePersonalScreen()),
@@ -40,8 +44,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
@@ -54,20 +61,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1),
+                      color: const Color(0xFF6366F1), // Keep brand color
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.local_shipping,
+                          Icons.directions_bus_filled,
                           color: Colors.white,
                           size: 20,
                         ),
                         SizedBox(width: 8),
                         Text(
-                          'DriverPortal',
+                          'MargDarshak',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -88,7 +95,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
@@ -110,13 +117,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const JourneyPlannerScreen()),
+                        MaterialPageRoute(builder: (context) => const support_center.SupportCenterScreen()),
                       );
                     },
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
@@ -126,9 +133,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.route_outlined,
-                        color: Colors.grey,
+                      child: Icon(
+                        Icons.support_agent_outlined,
+                        color: Colors.blue,
                         size: 20,
                       ),
                     ),
@@ -142,7 +149,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -156,7 +163,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Icon(
                       Icons.search,
-                      color: Colors.grey[400],
+                      color: theme.hintColor,
                       size: 20,
                     ),
                     const SizedBox(width: 12),
@@ -164,7 +171,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Text(
                         'Search routes, locations...',
                         style: TextStyle(
-                          color: Colors.grey[500],
+                          color: theme.hintColor,
                           fontSize: 16,
                         ),
                       ),
@@ -176,12 +183,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 24),
 
               // Ready for journey text
-              const Text(
+              Text(
                 'Ready for your next journey?',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
 
@@ -196,6 +203,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       '6.5h',
                       Colors.green,
                       Icons.access_time,
+                      theme,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -203,8 +211,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: _buildStatCard(
                       'Distance',
                       '245 km',
-                      const Color(0xFF6366F1),
+                      const Color(0xFFD2D2D8),
                       Icons.navigation_outlined,
+                      theme,
                     ),
                   ),
                 ],
@@ -220,6 +229,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       '78%',
                       Colors.orange,
                       Icons.local_gas_station,
+                      theme,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -229,6 +239,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       '₹1,850',
                       Colors.purple,
                       Icons.account_balance_wallet,
+                      theme,
                     ),
                   ),
                 ],
@@ -237,12 +248,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 32),
 
               // Quick Actions Section
-              const Text(
+              Text(
                 'Quick Actions',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
 
@@ -251,7 +262,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -271,8 +282,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             const Color(0xFF6366F1),
                             Icons.navigation,
                             () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Starting trip...')),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const JourneyPlannerScreen()),
                               );
                             },
                           ),
@@ -280,15 +292,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: _buildQuickActionButton(
-                            'Support',
-                            Colors.grey[100]!,
-                            Icons.headset_mic_outlined,
+                            'SOS Emergency',
+                            Colors.red,
+                            Icons.emergency,
                             () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Contacting support...')),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const SosEmergencyScreen()),
                               );
                             },
-                            isSecondary: true,
                           ),
                         ),
                       ],
@@ -299,30 +311,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: _buildQuickActionButton(
                             'Trip History',
-                            Colors.grey[100]!,
-                            Icons.description_outlined,
+                            Colors.green,
+                            Icons.history,
                             () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) => const TripHistoryScreen()),
                               );
                             },
-                            isSecondary: true,
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: _buildQuickActionButton(
-                            'Journey Planner',
-                            Colors.grey[100]!,
-                            Icons.route_outlined,
+                            'Settings',
+                            Colors.grey[600]!,
+                            Icons.settings,
                             () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const JourneyPlannerScreen()),
+                                MaterialPageRoute(builder: (context) => const SettingsScreen()),
                               );
                             },
-                            isSecondary: true,
                           ),
                         ),
                       ],
@@ -331,61 +341,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
 
-              const SizedBox(height: 32),
-
-              // Test Navigation Button
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.amber[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(
-                      Icons.bug_report,
-                      color: Colors.amber,
-                      size: 24,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Testing Mode',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const JourneyPlannerScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        foregroundColor: Colors.black87,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('Go to Journey Planner'),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 100), // Space for bottom navigation
+              const SizedBox(height: 100),
             ],
           ),
         ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -398,9 +361,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           currentIndex: _selectedIndex,
           onTap: _onTabTapped,
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
+          backgroundColor: theme.cardColor,
           selectedItemColor: const Color(0xFF6366F1),
-          unselectedItemColor: Colors.grey,
+          unselectedItemColor: theme.iconTheme.color,
           elevation: 0,
           items: const [
             BottomNavigationBarItem(
@@ -429,11 +392,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, Color color, IconData icon) {
+  Widget _buildStatCard(String title, String value, Color color, IconData icon, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -466,7 +429,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Text(
             title,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: theme.textTheme.bodyMedium?.color,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -474,8 +437,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.black87,
+            style: TextStyle(
+              color: theme.textTheme.bodyLarge?.color,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -489,9 +452,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     String title,
     Color backgroundColor,
     IconData icon,
-    VoidCallback onTap, {
-    bool isSecondary = false,
-  }) {
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -504,15 +466,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Icon(
               icon,
-              color: isSecondary ? Colors.grey[600] : Colors.white,
+              color: Colors.white,
               size: 24,
             ),
             const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: isSecondary ? Colors.grey[700] : Colors.white,
+              style: const TextStyle(
+                color: Colors.white,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
