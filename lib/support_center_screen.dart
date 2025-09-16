@@ -9,7 +9,7 @@ class SupportCenterScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Support Center'),
-        backgroundColor: Colors.blue[700],
+        backgroundColor: Colors.orange[700],
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -71,7 +71,7 @@ class SupportCenterScreen extends StatelessWidget {
           children: [
             const Row(
               children: [
-                Icon(Icons.phone, color: Colors.blue),
+                Icon(Icons.phone, color: Colors.orange),
                 SizedBox(width: 12),
                 Text(
                   'Call Customer Care',
@@ -96,7 +96,7 @@ class SupportCenterScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: Colors.orange[50],
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Row(
@@ -107,10 +107,10 @@ class SupportCenterScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+                        color: Colors.orange,
                       ),
                     ),
-                    Icon(Icons.phone, color: Colors.blue),
+                    Icon(Icons.phone, color: Colors.orange),
                   ],
                 ),
               ),

@@ -22,7 +22,7 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat Support'),
-        backgroundColor: Colors.blue[700],
+        backgroundColor: Colors.orange[700],
         elevation: 0,
       ),
       body: Column(
@@ -103,7 +103,7 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
                 ),
                 const SizedBox(width: 8),
                 CircleAvatar(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.orange,
                   child: IconButton(
                     icon: const Icon(Icons.send, color: Colors.white),
                     onPressed: _sendMessage,
@@ -129,7 +129,7 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
           if (!message.isUser) 
             const CircleAvatar(
               radius: 16,
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.orange,
               child: Icon(Icons.support_agent, size: 16, color: Colors.white),
             ),
           if (!message.isUser) const SizedBox(width: 8),
@@ -142,7 +142,7 @@ class _ChatSupportScreenState extends State<ChatSupportScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: message.isUser ? Colors.blue[100] : Colors.grey[200],
+                    color: message.isUser ? Colors.orange[100] : Colors.grey[200],
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
@@ -233,8 +233,8 @@ class QuickOptionChip extends StatelessWidget {
       onPressed: () {
         // Handle quick option selection
       },
-      backgroundColor: Colors.blue[50],
-      labelStyle: const TextStyle(color: Colors.blue),
+      backgroundColor: Colors.orange[50],
+      labelStyle: const TextStyle(color: Colors.orange),
     );
   }
 }
