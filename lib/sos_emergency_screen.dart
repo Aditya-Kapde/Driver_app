@@ -94,7 +94,7 @@ class _SosEmergencyScreenState extends State<SosEmergencyScreen> {
               title: 'Police',
               subtitle: 'Report incidents or crimes',
               phoneNumber: '100',
-              color: Colors.blue,
+              color: Colors.orange,
             ),
             const SizedBox(height: 12),
 
@@ -173,7 +173,7 @@ class _SosEmergencyScreenState extends State<SosEmergencyScreen> {
                       icon: const Icon(Icons.share, size: 16),
                       label: const Text('Share Location'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Colors.orange,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),

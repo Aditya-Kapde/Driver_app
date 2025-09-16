@@ -124,7 +124,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> with SingleTicker
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trip History'),
-        backgroundColor: const Color(0xFF6366F1),
+        backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         elevation: 0,
         shape: const RoundedRectangleBorder(
@@ -136,7 +136,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> with SingleTicker
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
               ),
             )
           : FadeTransition(
@@ -175,7 +175,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> with SingleTicker
                       crossAxisSpacing: 16,
                       childAspectRatio: 1.2,
                       children: [
-                        _buildAnimatedStatCard(0, '28', 'Total Trips', Icons.directions_bus_filled, Colors.blue),
+                        _buildAnimatedStatCard(0, '28', 'Total Trips', Icons.directions_bus_filled, Colors.orange),
                         _buildAnimatedStatCard(1, '894.5 km', 'Distance', Icons.navigation_rounded, Colors.green),
                         _buildAnimatedStatCard(2, '₹82,485', 'Revenue', Icons.account_balance_wallet_rounded, Colors.orange),
                         _buildAnimatedStatCard(3, '1247', 'Passengers', Icons.people_alt_rounded, Colors.purple),
@@ -231,7 +231,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> with SingleTicker
                                   _fetchTripData();
                                 },
                                 backgroundColor: Colors.white,
-                                selectedColor: const Color(0xFF6366F1),
+                                selectedColor: Colors.orange,
                                 labelStyle: TextStyle(
                                   color: isSelected ? Colors.white : Colors.black87,
                                   fontWeight: FontWeight.w500,
@@ -240,7 +240,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> with SingleTicker
                                   borderRadius: BorderRadius.circular(20),
                                   side: BorderSide(
                                     color: isSelected
-                                        ? const Color(0xFF6366F1)
+                                        ? Colors.orange
                                         : Colors.grey[300]!,
                                     width: isSelected ? 0 : 1,
                                   ),
@@ -469,7 +469,7 @@ class _TripHistoryScreenState extends State<TripHistoryScreen> with SingleTicker
   Widget _buildTripDetail(String title, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF6366F1)),
+        Icon(icon, size: 18, color: Colors.orange),
         const SizedBox(height: 4),
         Text(
           value,

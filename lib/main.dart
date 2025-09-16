@@ -59,16 +59,16 @@ class MargDarshakApp extends StatelessWidget {
 
   ThemeData _buildLightTheme() {
     return ThemeData(
-      primarySwatch: Colors.blue,
+      primarySwatch: Colors.orange,
       useMaterial3: true,
       brightness: Brightness.light,
       appBarTheme: const AppBarTheme(
         systemOverlayStyle: SystemUiOverlayStyle.light,
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+      scaffoldBackgroundColor: Colors.white,
       cardColor: Colors.white,
       dialogBackgroundColor: Colors.white,
       dividerColor: Colors.grey[300],
@@ -85,7 +85,7 @@ class MargDarshakApp extends StatelessWidget {
 
   ThemeData _buildDarkTheme() {
     return ThemeData(
-      primarySwatch: Colors.blue,
+      primarySwatch: Colors.orange,
       useMaterial3: true,
       brightness: Brightness.dark,
       appBarTheme: const AppBarTheme(
@@ -93,6 +93,7 @@ class MargDarshakApp extends StatelessWidget {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.orange),
       ),
       scaffoldBackgroundColor: const Color(0xFF121212),
       cardColor: const Color(0xFF1E1E1E),

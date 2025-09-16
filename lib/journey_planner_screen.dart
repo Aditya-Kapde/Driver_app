@@ -14,7 +14,7 @@ class JourneyPlannerApp extends StatelessWidget {
       title: 'Journey Planner',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.orange,
         useMaterial3: true,
       ),
       home: const JourneyPlannerScreen(),
@@ -158,7 +158,7 @@ class _JourneyPlannerScreenState extends State<JourneyPlannerScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text("Route View"),
-        backgroundColor: Colors.blue[700],
+        backgroundColor: Colors.orange[700],
         elevation: 0,
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
@@ -176,7 +176,7 @@ class _JourneyPlannerScreenState extends State<JourneyPlannerScreen>
                     focusNode: _startPointFocus,
                     decoration: InputDecoration(
                       labelText: 'Starting Point',
-                      prefixIcon: const Icon(Icons.my_location, color: Colors.blue),
+                      prefixIcon: const Icon(Icons.my_location, color: Colors.orange),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -190,7 +190,7 @@ class _JourneyPlannerScreenState extends State<JourneyPlannerScreen>
                     focusNode: _endPointFocus,
                     decoration: InputDecoration(
                       labelText: 'Destination',
-                      prefixIcon: const Icon(Icons.location_on, color: Colors.blue),
+                      prefixIcon: const Icon(Icons.location_on, color: Colors.orange),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -204,7 +204,7 @@ class _JourneyPlannerScreenState extends State<JourneyPlannerScreen>
                     child: ElevatedButton(
                       onPressed: _handleStartTrip,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[700],
+                        backgroundColor: Colors.orange[700],
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 32, vertical: 16),
@@ -228,7 +228,7 @@ class _JourneyPlannerScreenState extends State<JourneyPlannerScreen>
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
-                color: Colors.blue[700],
+                color: Colors.orange[700],
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -353,10 +353,10 @@ class _JourneyPlannerScreenState extends State<JourneyPlannerScreen>
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: Colors.blue[50],
+              color: Colors.orange[50],
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.location_pin, color: Colors.blue, size: 20),
+            child: const Icon(Icons.location_pin, color: Colors.orange, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -372,7 +372,7 @@ class _JourneyPlannerScreenState extends State<JourneyPlannerScreen>
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.blue[700],
+              color: Colors.orange[700],
             ),
           ),
         ],
