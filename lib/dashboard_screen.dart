@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'theme_notifier.dart';
 import 'setup_profile_personal_screen.dart';
 import 'sos_emergency_screen.dart';
@@ -42,11 +43,11 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   // Dashboard data
   Map<String, dynamic> _driverStats = {
-    'todayHours': '6.5h',
-    'distance': '245 km',
-    'earnings': '₹1,850',
-    'activeRoute': {'name': 'Route 42', 'nextStop': 'Central Station'},
-    'currentLocation': 'Main Street & 5th Avenue'
+    'todayHours': '0h',
+    'distance': '0 km',
+    'earnings': '₹0',
+    'activeRoute': null,
+    'currentLocation': 'Unknown'
   };
 
   // Crowd level state
@@ -64,14 +65,18 @@ class _DashboardScreenState extends State<DashboardScreen>
   ];
   List<String> _filteredFeatures = [];
 
+  // Driver's vehicle number
+  String? _vehicleNumber;
+
   // API endpoints
   static const String BASE_URL = String.fromEnvironment('BASE_URL',
-      defaultValue: 'http://your-spring-boot-server:8080/api');
+      defaultValue: 'http://localhost:8080/api');
   static const String WS_URL = String.fromEnvironment('WS_URL',
-      defaultValue: 'ws://your-server:8080/trip/socket');
+      defaultValue: 'ws://localhost:8080/trip/socket');
   static const String DASHBOARD_STATS_ENDPOINT = '$BASE_URL/driver/stats';
   static const String ACTIVE_ROUTE_ENDPOINT = '$BASE_URL/driver/active-route';
   static const String START_TRIP_ENDPOINT = '$BASE_URL/trips/start';
+  static const String DRIVER_PROFILE_ENDPOINT = '$BASE_URL/driver/profile';
 
   // WebSocket for live location
   WebSocketChannel? _wsChannel;
@@ -100,6 +105,8 @@ class _DashboardScreenState extends State<DashboardScreen>
     _searchController.addListener(_onSearchChanged);
     _filteredFeatures = _features;
 
+    _loadDriverProfile();
+    _checkLocationPermission();
     _loadDashboardData();
   }
 
@@ -110,6 +117,88 @@ class _DashboardScreenState extends State<DashboardScreen>
     _locationTimer?.cancel();
     _wsChannel?.sink.close();
     super.dispose();
+  }
+
+  // Check and request location permission
+  Future<void> _checkLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Location services are disabled. Please enable them.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Location permissions are denied.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Location permissions are permanently denied.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+  }
+
+  // Load driver profile to get vehicleNumber
+  Future<void> _loadDriverProfile() async {
+    try {
+      final storage = FlutterSecureStorage();
+      final accessToken = await storage.read(key: 'access_token');
+
+      if (accessToken == null) {
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse(DRIVER_PROFILE_ENDPOINT),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final profileData = json.decode(response.body);
+        setState(() {
+          _vehicleNumber = profileData['vehicleNumber'];
+        });
+      } else {
+        print('Failed to load driver profile: ${response.body}');
+      }
+    } catch (e) {
+      print('Error loading driver profile: $e');
+    }
+  }
+
+  // Select a vehicle from BusScheduleScreen
+  Future<void> _selectVehicle() async {
+    final result = await Navigator.pushNamed(context, '/bus_schedule');
+    if (result != null && result is Map<String, String>) {
+      setState(() {
+        _vehicleNumber = result['vehicleNumber'];
+      });
+    }
   }
 
   // Load dashboard data from backend
@@ -166,10 +255,13 @@ class _DashboardScreenState extends State<DashboardScreen>
         if (routeData['hasActiveRoute'] == true) {
           setState(() {
             _driverStats['activeRoute'] = routeData['activeRoute'];
+            _driverStats['currentLocation'] =
+                routeData['currentLocation'] ?? 'Unknown';
           });
         } else {
           setState(() {
             _driverStats['activeRoute'] = null;
+            _driverStats['currentLocation'] = 'Unknown';
           });
         }
       }
@@ -188,6 +280,17 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   // Start a new trip and setup WebSocket for live location sharing
   Future<void> _startTrip() async {
+    if (_vehicleNumber == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a vehicle from the schedule.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      await _selectVehicle();
+      if (_vehicleNumber == null) return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -204,16 +307,24 @@ class _DashboardScreenState extends State<DashboardScreen>
         return;
       }
 
+      // Get current location
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      // Prepare trip data for POST request
+      final tripData = {
+        'vehicleNumber': _vehicleNumber,
+        'startTime': DateTime.now().toUtc().toIso8601String(),
+      };
+
+      // Send POST request to start trip
       final response = await http.post(
         Uri.parse(START_TRIP_ENDPOINT),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: json.encode({
-          'startTime': DateTime.now().toIso8601String(),
-          'vehicleId': 'default',
-        }),
+        body: json.encode(tripData),
       );
 
       if (response.statusCode == 201) {
@@ -232,32 +343,77 @@ class _DashboardScreenState extends State<DashboardScreen>
         _wsChannel!.stream.listen(
           (message) {
             print('Received WebSocket message: $message');
+            // Update current location in driverStats
+            try {
+              final data = json.decode(message);
+              if (data['latitude'] != null && data['longitude'] != null) {
+                setState(() {
+                  _driverStats['currentLocation'] =
+                      'Lat: ${data['latitude']}, Lng: ${data['longitude']}';
+                });
+              }
+            } catch (e) {
+              print('Error parsing WebSocket message: $e');
+            }
           },
-          onError: (error) => print('WebSocket error: $error'),
-          onDone: () => print('WebSocket disconnected'),
+          onError: (error) {
+            print('WebSocket error: $error');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('WebSocket error: $error'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          },
+          onDone: () {
+            print('WebSocket disconnected');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('WebSocket disconnected'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          },
         );
 
-        // Send periodic location updates
-        _locationTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-          final lat = 12.9716; // Replace with actual location (e.g., from geolocator)
-          final lng = 77.5946;
-          final locationData = {
-            'latitude': lat,
-            'longitude': lng,
-            'timestamp': DateTime.now().toIso8601String(),
-            'driverId': 'default_driver_id', // Replace with actual driver ID
-          };
+        // Send initial WebSocket message with location
+        final initialLocationData = {
+          'vehicleNumber': _vehicleNumber,
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+          'timestamp': DateTime.now().toUtc().toIso8601String(),
+        };
+        _wsChannel!.sink.add(json.encode(initialLocationData));
 
-          // Send to WebSocket (backend stores in Redis)
-          _wsChannel!.sink.add(json.encode(locationData));
-          print('Sent location to WebSocket: ($lat, $lng)');
+        // Send periodic location updates
+        _locationTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
+          try {
+            Position updatedPosition = await Geolocator.getCurrentPosition(
+                desiredAccuracy: LocationAccuracy.high);
+            final locationData = {
+              'vehicleNumber': _vehicleNumber,
+              'latitude': updatedPosition.latitude,
+              'longitude': updatedPosition.longitude,
+              'timestamp': DateTime.now().toUtc().toIso8601String(),
+            };
+            _wsChannel!.sink.add(json.encode(locationData));
+            print(
+                'Sent location to WebSocket: (${updatedPosition.latitude}, ${updatedPosition.longitude})');
+            setState(() {
+              _driverStats['currentLocation'] =
+                  'Lat: ${updatedPosition.latitude}, Lng: ${updatedPosition.longitude}';
+            });
+          } catch (e) {
+            print('Error sending location update: $e');
+          }
         });
 
         await _loadDashboardData();
       } else {
+        final errorMessage = json.decode(response.body)['message'] ?? 'Failed to start trip';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to start trip'),
+          SnackBar(
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
@@ -307,7 +463,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         Navigator.pushNamed(context, '/support_center');
         break;
       case 'Schedule':
-        Navigator.pushNamed(context, '/bus_schedule');
+        _selectVehicle();
         break;
       case 'Journey Planner':
         Navigator.pushNamed(context, '/journey_planner');
@@ -350,6 +506,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     }
   }
 
+  // The rest of the build method and other unchanged methods remain as in the original code
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -474,11 +631,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                             color: theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 2),
-                              ),
+                              BoxShadow( // ✅ correct widget
+      color: Colors.grey.withOpacity(0.5),
+      spreadRadius: 2,
+      blurRadius: 5,
+      offset: Offset(0, 3),
+    ),
                             ],
                           ),
                           child: const Icon(
@@ -613,7 +771,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     const SizedBox(height: 2),
                                     Text(
                                         _driverStats['activeRoute']['name'] ??
-                                            'Route 42',
+                                            'Unknown Route',
                                         style: theme.textTheme.titleMedium
                                             ?.copyWith(
                                                 fontWeight: FontWeight.w700)),
@@ -629,7 +787,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   const SizedBox(height: 2),
                                   Text(
                                       _driverStats['activeRoute']['nextStop'] ??
-                                          'Central Station',
+                                          'Unknown Stop',
                                       style: theme.textTheme.bodyMedium
                                           ?.copyWith(
                                               fontWeight: FontWeight.w600)),
@@ -815,7 +973,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     ? theme.colorScheme.primary
                                     : theme.colorScheme.surface,
                                 Icons.schedule,
-                                () => Navigator.pushNamed(context, '/bus_schedule'),
+                                _selectVehicle,
                                 onHover: (h) => _setHoverState('Schedule', h),
                                 isHovered: _hoverStates['Schedule']!,
                               ),
